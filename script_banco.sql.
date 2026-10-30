@@ -1,0 +1,49 @@
+-- 1. CRIAÇÃO DAS TABELA DE USUÁRIOS E PEDIDOS
+CREATE TABLE usuario (
+    id SERIAL PRIMARY KEY,
+    id_cliente VARCHAR(50),
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    idade INT,
+    pais VARCHAR(50)
+);
+
+CREATE TABLE pedidos (
+    id_pedido SERIAL PRIMARY KEY,
+    id_cliente INT,
+    data_pedido TIMESTAMP,
+    data_entrega TIMESTAMP,
+    valor_total NUMERIC(10,2),
+    moeda VARCHAR(3),
+    status VARCHAR(30)
+);
+
+-- 2. INSERÇÃO DOS DADOS DE TESTE (Com Liechtenstein)
+INSERT INTO usuario (id_cliente, nome, email, idade, pais) VALUES
+('CLI001', 'Manuel Silva', 'manuel@email.com', 45, 'Portugal'),
+('CLI002', 'Ana Schmidt', 'ana.s@email.com', 32, 'Alemanha'),
+('CLI003', 'Carlos Pereira', 'carlos@email.com', 53, 'Portugal'),
+('CLI004', 'John Doe', 'john@email.com', 29, 'Canadá'),
+('CLI005', 'Maria Santos', 'maria@email.com', 38, 'Portugal'),
+('CLI006', 'Josefh Moriah', 'j.mmm@email.com', 47, 'Liechtenstein');
+
+INSERT INTO pedidos (id_cliente, data_pedido, data_entrega, valor_total, moeda, status) VALUES
+(1, '2026-10-01 10:00:00', '2026-10-04 14:30:00', 150.50, 'EUR', 'Entregue'),
+(3, '2026-10-05 11:00:00', '2026-10-07 15:00:00', 320.00, 'EUR', 'Entregue'),
+(2, '2026-10-15 09:15:00', '2026-10-17 11:00:00', 89.90, 'EUR', 'Entregue'),
+(1, '2026-10-20 18:20:00', NULL, 450.00, 'EUR', 'Em trânsito'),
+(5, '2026-10-22 14:00:00', '2026-10-24 16:00:00', 600.00, 'EUR', 'Entregue'),
+(5, '2026-10-25 10:00:00', '2026-10-26 12:00:00', 150.00, 'EUR', 'Entregue'),
+(6, '2026-10-26 14:00:00', '2026-10-29 09:30:00', 850.00, 'EUR', 'Entregue');
+
+-- 3. CONSULTA ANALÍTICA PARA O RELATÓRIO
+SELECT 
+    u.nome,
+    u.email,
+    u.pais,
+    SUM(p.valor_total) AS total_gasto
+FROM usuario u
+INNER JOIN pedidos p ON u.id = p.id_cliente
+WHERE p.status = 'Entregue'
+GROUP BY u.nome, u.email, u.pais
+ORDER BY total_gasto DESC;
