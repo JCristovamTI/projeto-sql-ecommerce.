@@ -1,0 +1,60 @@
+ !pip install faker pandas psycopg2-binary
+
+Requirement already satisfied: faker in /usr/local/lib/python3.13/dist-packages (40.44.0)
+Requirement already satisfied: pandas in /usr/local/lib/python3.13/dist-packages (2.2.3)
+Requirement already satisfied: psycopg2-binary in /usr/local/lib/python3.13/dist-packages (2.9.13)
+Requirement already satisfied: numpy>=1.26.0 in /usr/local/lib/python3.13/dist-packages (from pandas) (2.1.3)
+Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.13/dist-packages (from pandas) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.13/dist-packages (from pandas) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.13/dist-packages (from pandas) (2026.5)
+Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.13/dist-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)
+
+import pandas as pd
+from faker import Faker
+import random
+from datetime import datetime, timedelta
+
+# Inicializa o Faker configurado para dados internacionais/europeus
+fake = Faker(['en_US', 'pt_PT'])
+
+# 1. Gerando Dados de Clientes (Customers)
+clientes = []
+for i in range(1, 101):  # 100 clientes
+    clientes.append({
+        "id_cliente": i,
+        "nome": fake.name(),
+        "email": fake.email(),
+        "pais": random.choice(["Portugal", "Alemanha", "Canadá", "Brasil", "Espanha"]),
+        "data_cadastro": fake.date_between(start_date='-2y', end_date='today')
+    })
+
+df_clientes = pd.DataFrame(clientes)
+
+# 2. Gerando Dados de Pedidos (Orders)
+pedidos = []
+status_opcoes = ["Entregue", "Cancelado", "Em trânsito"]
+moedas = ["EUR", "USD"]
+
+for i in range(1, 501):  # 500 pedidos
+    id_cliente_aleatorio = random.randint(1, 100)
+    data_pedido = fake.date_time_between(start_date='-1y', end_date='now')
+    # Calcula data de entrega simulada (alguns dias após o pedido)
+    data_entrega = data_pedido + timedelta(days=random.randint(2, 10)) if random.choice([True, True, False]) else None
+
+    pedidos.append({
+        "id_pedido": i,
+        "id_cliente": id_cliente_aleatorio,
+        "data_pedido": data_pedido,
+        "data_entrega": data_entrega,
+        "valor_total": round(random.uniform(15.0, 1200.0), 2),
+        "moeda": random.choice(moedas),
+        "status": random.choice(status_opcoes)
+    })
+
+df_pedidos = pd.DataFrame(pedidos)
+
+# Exportando para CSV (você usará esses arquivos para carregar no SQL)
+df_clientes.to_csv("clientes.csv", index=False)
+df_pedidos.to_csv("pedidos.csv", index=False)
+
+print("Arquivos clientes.csv e pedidos.csv gerados com sucesso!")
